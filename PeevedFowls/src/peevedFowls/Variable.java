@@ -20,13 +20,13 @@ public class Variable
 		algebraNumber=number;
 		algebraExponent = exponent;
 	}
-	public double evaluate(int number)
+	public double evaluate(double time)
 	{
 		for(int i = 1; i < algebraExponent;i++)
 		{
-			number*=number;
+			time*=time;
 		}
-		return algebraNumber*number;
+		return algebraNumber*time;
 		
 	}
 	

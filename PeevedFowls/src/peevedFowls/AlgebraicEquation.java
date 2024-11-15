@@ -11,14 +11,24 @@ public class AlgebraicEquation
 		equationVariable=variables;
 		equationNumber = number;
 	}
-	public double evaluate(int evaluateNumber)
+	public double evaluate(double time)
 	{
 		int resultSum = 0;
 		for(int i = 0; i < equationVariable.size();i++)
 		{
-			resultSum+=equationVariable.get(i).evaluate(evaluateNumber);
+			resultSum+=equationVariable.get(i).evaluate(time);
 		}
 		return resultSum+equationNumber;
+	}
+	public String toString()
+	{
+		String s = "";
+		for(int i = 0; i < equationVariable.size();i++)
+		{
+			s+=equationVariable.get(i).toString()+"+";
+		}
+		s+=equationNumber;
+		return s;
 	}
 	
 }

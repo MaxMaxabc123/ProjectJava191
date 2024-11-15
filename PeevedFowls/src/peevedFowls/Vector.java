@@ -8,8 +8,11 @@ public class Vector
 	{
 		vectorAlgebraicEquation=AlgebraicEquation;
 	}
-	
-	public double evaluateVelocity(int time)
+	public AlgebraicEquation getAt(int index)
+	{
+		return vectorAlgebraicEquation.get(index);
+	}
+	public double evaluateVelocity(double time)
 	{
 		double sum = 0;
 		for(int i = 0; i <vectorAlgebraicEquation.size();i++)
