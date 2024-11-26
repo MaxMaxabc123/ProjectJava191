@@ -37,6 +37,6 @@ public class Variable
 		{
 			s="^"+algebraExponent;
 		}
-		return algebraNumber+""+algebraVariable+s;
+		return (int)algebraNumber+""+algebraVariable+s;
 	}
 }

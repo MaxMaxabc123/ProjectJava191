@@ -2,8 +2,9 @@ package peevedFowls;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Scanner;
 import java.util.Timer;
-import java.util.concurrent.TimeUnit;
+
 public class GameMain
 {
 	static Level gameLevel;
@@ -12,45 +13,6 @@ public class GameMain
 	boolean firingState;
 	static Timer timer;
 	
-	public static void hitDetection()
-	{
-		// sets the physics plane with the coordinates of all the levels physics objects
-		for(int t = 0; t<gameLevel.physicsListLevel.length;t++)
-		{
-			gameLevel.physicsLevelPlane[(int)gameLevel.physicsListLevel[t].yCoordinate][(int)gameLevel.physicsListLevel[t].xCoordinate] = gameLevel.physicsListLevel[t];
-		}
-		// goes through all the physics objects and gets their x cord and y cord
-		for(int t = 0; t < gameLevel.physicsListLevel.length;t++)
-		{
-			// two starting coordinates that are the physics objects xCoord and yCoord which is where in the physicsLevelPlane we will start to iterate
-			int startingCordX,startingCordY;
-			startingCordX=gameLevel.physicsListLevel[t].xCoordinate;
-			startingCordY=gameLevel.physicsListLevel[t].yCoordinate;
-			// checks the surrounding blocks in the physics list level based on the size of the object 
-			for(int i = 0;i<gameLevel.physicsListLevel[t].objectSize;i++)
-			{
-				for(int j = 0;j<gameLevel.physicsListLevel[t].objectSize;j++)
-				{
-					// checks if the object in the range of the physics object is a block 
-					if(gameLevel.physicsLevelPlane[(int) startingCordY+i][(int) startingCordX+j]instanceof Block)
-					{
-						// damage the block according to how hard it was hit by the physics object
-						((Block) gameLevel.physicsLevelPlane[(int) startingCordY+i][(int) startingCordX+j]).damageTheBlock(gameLevel.physicsListLevel[t].objectVelocity,time);
-						//if the block is damaged to the point where the strength of the block is 0 or less set the object in the plane to null and it goes poof, bye bye
-						if(((Block) gameLevel.physicsLevelPlane[(int) startingCordY+i][(int) startingCordX+j]).returnBlocksBreakingJoule()<=0)
-						{
-							gameLevel.physicsLevelPlane[(int) startingCordY+i][(int) startingCordX+j]=null;
-						}
-						// if its not broken then set the collided objects with the velocity of the physics object being checked in the list
-						else
-						{
-							((Block) gameLevel.physicsLevelPlane[(int) startingCordY+i][(int) startingCordX+j]).getHit(gameLevel.physicsListLevel[t].objectVelocity,gameLevel.physicsListLevel[t].objectPosistion);
-						}
-					}
-				}
-			}
-		}
-	}
 	public static boolean PiggiesInLevel()
 	{
 		for(int i = 0; i < gameLevel.physicsListLevel.length;i++)
@@ -62,7 +24,42 @@ public class GameMain
 		}
 		return false;
 	}
-	
+	public static boolean BirdsInLevel()
+	{
+		for(int i = 0; i < gameLevel.physicsListLevel.length;i++)
+		{
+			if(gameLevel.physicsListLevel[i] instanceof Fowl)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+	public static Vector generateVector(String string)
+	{
+		String xCordEquation="";
+		String yCordEquation="";
+		Vector VectorReturn;
+		ArrayList<AlgebraicEquation> arrayList = new ArrayList<AlgebraicEquation>();
+		int i = 0;
+		while(string.charAt(i)!='&')
+		{
+			xCordEquation+=string.charAt(i);
+			i++;
+		}
+		i++;
+		while(i<string.length())
+		{
+			yCordEquation+=string.charAt(i);
+			i++;
+		}
+//		System.out.println(xCordEquation);
+//		System.out.println(yCordEquation);
+		arrayList.add(generateAlgebraicEquation(xCordEquation));
+		arrayList.add(generateAlgebraicEquation(yCordEquation));
+		VectorReturn = new Vector(arrayList);
+		return VectorReturn;
+	}
 	public static AlgebraicEquation generateAlgebraicEquation(String string)
 	{
 		AlgebraicEquation equation = null;
@@ -70,14 +67,20 @@ public class GameMain
 		int number=1;
 		boolean negNum=false;
 		int i = 0;
+		ArrayList<Integer> freeIntList = new ArrayList<Integer>();
+		int finalIntNum=0;
+//		"-10t^2-10t+100+10t^2+10t-100:";
 		while (true)
 		{
 		switch(string.charAt(i))
 		{
 			case ':':
 			{
-				
-				equation = new AlgebraicEquation(arrayList,number);
+				for(int j = 0; j < freeIntList.size();j++)
+				{
+					finalIntNum+=freeIntList.get(j);
+				}
+				equation = new AlgebraicEquation(arrayList,finalIntNum);
 				return equation;
 			
 			}
@@ -93,6 +96,10 @@ public class GameMain
 				{
 					number*=-1;
 				}
+				if(string.charAt(i)!='t')
+				{
+					freeIntList.add(number);
+				}
 				break;
 			}
 			case't':
@@ -105,9 +112,9 @@ public class GameMain
 				}
 				else
 				{
-				arrayList.add(new Variable(string.charAt(i),number));
-				number=0;
-				i++;
+					arrayList.add(new Variable(string.charAt(i),number));
+					number=0;
+					i++;
 				}
 				break;
 			}
@@ -115,6 +122,7 @@ public class GameMain
 			{
 				negNum=false;
 				i++;
+				
 				break;
 			}
 			case'-':
@@ -140,7 +148,7 @@ public class GameMain
 		int mass = 0;
 		int numPos=0;
 		int numTemp = 0;
-		
+	
 		while(true)
 		{
 			switch(string.charAt(i))
@@ -200,7 +208,6 @@ public class GameMain
 				}
 				case'+':
 				{
-					
 					posX=0;
 					posY=0;
 					mass=0;
@@ -230,34 +237,73 @@ public class GameMain
 	}
 	public static void GravityGenerator()
 	{
-		String gravityStringCompY = "5t^2:";
-		String gravityStringCompX = "0t:";
-		ArrayList<AlgebraicEquation> gravVector = new ArrayList<>();
-		gravVector.add(generateAlgebraicEquation(gravityStringCompX));
-		gravVector.add(generateAlgebraicEquation(gravityStringCompY));
+		String gravityPosStringCompY = "5t^2:";
+		String gravityPosStringCompX = "0t:";
+		String gravityVelStringCompY="10t:";
+		String gravityVelStringCompX = "0t:";
+		ArrayList<AlgebraicEquation> gravPosVector = new ArrayList<>();
+		gravPosVector.add(generateAlgebraicEquation(gravityPosStringCompX));
+		gravPosVector.add(generateAlgebraicEquation(gravityPosStringCompY));
+		ArrayList<AlgebraicEquation> gravVelVector = new ArrayList<>();
+		gravVelVector.add(generateAlgebraicEquation(gravityVelStringCompX));
+		gravVelVector.add(generateAlgebraicEquation(gravityVelStringCompY));
+		ArrayList<AlgebraicEquation> blankPosVector = new ArrayList<>();
+		blankPosVector.add(generateAlgebraicEquation(gravityPosStringCompX));
+		blankPosVector.add(generateAlgebraicEquation(gravityPosStringCompX));
+		ArrayList<AlgebraicEquation> blankVelVector = new ArrayList<>();
+		blankVelVector.add(generateAlgebraicEquation(gravityPosStringCompX));
+		blankVelVector.add(generateAlgebraicEquation(gravityPosStringCompX));
 		for(int i = 0;i < gameLevel.physicsListLevel.length;i++)
 		{
-			gameLevel.physicsListLevel[i].objectPosistion = new Vector(gravVector);
+			if(gameLevel.physicsListLevel[i] instanceof Block&& !gameLevel.physicsListLevel[i].gotHit)
+			{
+				gameLevel.physicsListLevel[i].objectPosistion = new Vector(blankPosVector);
+				gameLevel.physicsListLevel[i].objectVelocity = new Vector(blankVelVector);
+			}
+			else
+			{
+				gameLevel.physicsListLevel[i].objectPosistion = new Vector(gravPosVector);
+				gameLevel.physicsListLevel[i].objectVelocity = new Vector(gravVelVector);
+			}
 		}
 	}
-		
+	public static void SetObjectsVectors(String vectorX,String vectorY)
+	{
+		ArrayList<AlgebraicEquation> gravPosVector = new ArrayList<>();
+		gravPosVector.add(generateAlgebraicEquation(vectorX));
+		gravPosVector.add(generateAlgebraicEquation(vectorY));
+		for(int i = 0;i < gameLevel.physicsListLevel.length;i++)
+		{
+			gameLevel.physicsListLevel[i].objectPosistion = new Vector(gravPosVector);
+		}
+	}
 	
 	public static void main(String[] args) throws InterruptedException
 	{
-//		String posistionY = "-10t^2-10t+100:";
-//		System.out.println(generateAlgebraicEquation(posistionY).evaluate(2));
-		gameLevel = LevelBuilder("(100,100,14,13,123)B+(200,200,24,12)F+(300,300,31,12,15)P:",800,800);
+		String posistionY = "-200t^2-10t-100:";
+		String posistionX = "10t+10:";
+//		String s = "(205,205,14000,13,123)B+(200,200,24,12)F+(300,300,31000,12,15)P:";
+		gameLevel = LevelBuilder("(20,20,24,12)F+(600,788,14000000,12,123)B+(600,776,14000000,12,123)B+(600,764,14000000,12,123)B:",800,800);
 		System.setProperty("sun.java2d.opengl", "true");
 		GravityGenerator();
-		timer = new Timer();
+//		Vector v = generateVector("10t+10:&10t^2+10t+100:");
+//		System.out.println(gameLevel.physicsListLevel[0].objectPosistion.getAt(0).toString());
+//		String inputEquation;
+//		Scanner posistionInput = new Scanner(System.in);
+//		inputEquation=posistionInput.nextLine();
+//		GameMain.gameLevel.physicsListLevel[0].objectPosistion=GameMain.generateVector(inputEquation);
+//		timer = new Timer();
 		new MyFrame();
 		
-//		 where the game happens
-		do
-		{
-			hitDetection();
-			time+=.033;
-		}while(PiggiesInLevel());
+		System.out.println(gameLevel.coordinateLevelPlane[32][20].occupyingPhysicsObject);
+//		System.out.println(generateAlgebraicEquation(posistionY).evaluateAbsValue(2));
+//		
+//		
+////		 where the game happens
+//		do
+//		{
+//			time+=.033;
+//		}while(PiggiesInLevel());
 	}
 	
 	

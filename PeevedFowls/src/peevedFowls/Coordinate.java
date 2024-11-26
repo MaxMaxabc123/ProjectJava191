@@ -4,6 +4,8 @@ public class Coordinate
 {
 	private int xCoordinate;
 	private int yCoordinate;
+	protected boolean accessed=false;
+	protected PhysicsObject occupyingPhysicsObject=null;
 	public Coordinate(int x,int y)
 	{
 		xCoordinate=x;
@@ -16,5 +18,9 @@ public class Coordinate
 	public int getYCoord()
 	{
 		return yCoordinate;
+	}
+	public String toString()
+	{
+		return xCoordinate+","+yCoordinate;
 	}
 }

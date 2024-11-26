@@ -20,6 +20,27 @@ public class AlgebraicEquation
 		}
 		return resultSum+equationNumber;
 	}
+	public double evaluateAbsValue(double time)
+	{
+		int resultSum = 0;
+		for(int i = 0; i < equationVariable.size();i++)
+		{
+			if(equationVariable.get(i).evaluate(time)<=0)
+			{
+				resultSum+=(equationVariable.get(i).evaluate(time)*-1);
+				
+			}
+			else
+			{
+				resultSum+=equationVariable.get(i).evaluate(time);
+			}
+		}
+		if(equationNumber<=0)
+		{
+			equationNumber*=-1;
+		}
+		return resultSum+equationNumber;
+	}
 	public String toString()
 	{
 		String s = "";
@@ -27,7 +48,7 @@ public class AlgebraicEquation
 		{
 			s+=equationVariable.get(i).toString()+"+";
 		}
-		s+=equationNumber;
+		s+=(int)equationNumber;
 		return s;
 	}
 	
